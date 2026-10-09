@@ -40,34 +40,42 @@ unless explicitly exported to that process.
 ## Deploy the configured Vercel frontend and Render API
 
 The checked-in Vite mode files set local development to `http://localhost:5001/api` and
-production to `https://restify-p6wb.onrender.com/api`. In the Vercel project settings, set the
-build environment variable `VITE_API_URL` to exactly:
+production to `https://restify-p6wb.onrender.com/api`.
+
+For Vercel, use the repository's `frontend/` directory as the project Root Directory. Use the
+Vite framework preset, build command `npm run build`, and output directory `dist`. The
+`frontend/vercel.json` SPA rewrite is loaded from that project root and serves `index.html` for
+client-side routes such as `/register` and `/dashboard`, while Vercel serves built assets. Set
+`VITE_API_URL` in the Vercel Production environment to exactly:
 
 ```text
 https://restify-p6wb.onrender.com/api
 ```
 
+Enter only the URL above in Vercel—do not include Markdown backticks, quotation marks, or
+surrounding whitespace. The client tolerates accidental wrapping quotes/backticks, but the
+environment value should still be corrected to the plain URL. A malformed or relative API URL
+is rejected instead of being sent to the Vercel frontend as a same-origin request.
+
 Vercel environment variables take precedence over `.env.production`; remove any old
 `VITE_API_URL` value pointing at localhost, then trigger a new deployment so the URL is baked
 into the static bundle. The API client appends endpoint paths (for example `/auth/login`), so the
 base must end in `/api` exactly once.
-When the Vercel project's Root Directory is `frontend/`, its `vercel.json` rewrites SPA paths
-such as `/login` and `/dashboard` to the app shell while Vercel serves generated static assets
-normally. If the project uses a different Root Directory, put the same config at that directory's
-root. The Vercel dashboard's Root Directory setting is not available in this checkout.
 
-In Render's backend service environment, set:
+For Render, use `backend/` as the service Root Directory, `npm ci` as the build command, and
+`npm start` as the start command. Set the health check path to `/api/health`. Render supplies the
+`PORT` value at runtime; do not hard-code a production port. Set these service environment values:
 
 ```text
 NODE_ENV=production
 CLIENT_URL=https://restify-6no6.vercel.app
 ```
 
-Keep the existing `MONGODB_URI` and `JWT_SECRET` values configured privately in Render; this
-guide intentionally does not include or inspect them. Render supplies `PORT`; the server uses
-that value and falls back to `5000` for local runs. Save changes and redeploy/restart the Render
-service. The production Vercel origin is explicitly allowlisted by the backend; local Vite
-origins are only allowed when `NODE_ENV=development`.
+Keep `MONGODB_URI` and `JWT_SECRET` configured privately in Render; this guide intentionally
+does not include or inspect them. Render supplies `PORT`; the server uses that value. For local
+development, the default port is `5001`. Save changes and redeploy/restart the Render service.
+The production Vercel origin is explicitly allowlisted by the backend; local Vite origins are
+only allowed when `NODE_ENV=development`.
 
 ## Install and run
 

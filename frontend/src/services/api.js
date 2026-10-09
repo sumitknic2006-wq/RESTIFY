@@ -1,8 +1,9 @@
 import { getToken } from './tokenStorage';
+import { normalizeApiUrl } from './apiUrl';
 
-export const API_URL = (
+export const API_URL = normalizeApiUrl(
   import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
-).replace(/\/+$/, '');
+);
 
 async function request(path, options = {}) {
   const token = getToken();
