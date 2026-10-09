@@ -17,17 +17,29 @@ const adminRoutes = require('./routes/adminRoutes');
 const errorMiddleware = require('./middleware/errorMiddleware');
 
 const app = express();
-const allowedOrigins = [env.CLIENT_URL];
-
-if (env.NODE_ENV === 'development') {
-  allowedOrigins.push('http://localhost:5174');
-}
+const productionOrigin = 'https://restify-6no6.vercel.app';
 
 app.use(express.json({ limit: '10kb' }));
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin(origin, callback) {
+      const allowedOrigins = [env.CLIENT_URL, productionOrigin];
+      if (env.NODE_ENV === 'development') {
+        allowedOrigins.push('http://localhost:5173', 'http://localhost:5174');
+      }
+      const isLocalOrigin =
+        origin === 'http://localhost:5173' ||
+        origin === 'http://localhost:5174' ||
+        origin === 'http://127.0.0.1:5173' ||
+        origin === 'http://127.0.0.1:5174';
+      const isAllowed =
+        !origin ||
+        (allowedOrigins.includes(origin) && (env.NODE_ENV === 'development' || !isLocalOrigin));
+      callback(null, isAllowed);
+    },
     credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 

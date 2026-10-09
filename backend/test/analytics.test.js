@@ -7,6 +7,7 @@ const Activity = require('../src/models/Activity');
 const Session = require('../src/models/Session');
 const authService = require('../src/services/authService');
 const analyticsService = require('../src/services/analyticsService');
+const env = require('../src/config/env');
 const { generateToken } = require('../src/utils/jwt');
 const createAppError = require('../src/utils/appError');
 
@@ -101,12 +102,63 @@ test('analytics endpoints require authentication and use only the verified owner
   assert.deepEqual(queryOwners, paths.flatMap(() => [OTHER_ID, OTHER_ID]));
 });
 
-test('development CORS allows the Vite fallback preview origin', async () => {
-  const response = await fetch(`${baseUrl}/api/health`, {
-    headers: { Origin: 'http://localhost:5174' },
-  });
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get('access-control-allow-origin'), 'http://localhost:5174');
+test('CORS allows the configured production origin and required API preflight headers', async () => {
+  const originalNodeEnv = env.NODE_ENV;
+  const originalClientUrl = env.CLIENT_URL;
+  env.NODE_ENV = 'production';
+  env.CLIENT_URL = 'http://localhost:5173';
+
+  try {
+    const response = await fetch(`${baseUrl}/api/auth/login`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://restify-6no6.vercel.app',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'authorization,content-type',
+      },
+    });
+    assert.equal(response.status, 204);
+    assert.equal(
+      response.headers.get('access-control-allow-origin'),
+      'https://restify-6no6.vercel.app'
+    );
+    assert.equal(response.headers.get('access-control-allow-credentials'), 'true');
+    assert.match(response.headers.get('access-control-allow-methods'), /\bPOST\b/);
+    assert.match(response.headers.get('access-control-allow-headers'), /Authorization/i);
+    assert.match(response.headers.get('access-control-allow-headers'), /Content-Type/i);
+
+    const denied = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: 'http://localhost:5173' },
+    });
+    assert.equal(denied.headers.get('access-control-allow-origin'), null);
+    const untrusted = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: 'https://untrusted.example' },
+    });
+    assert.equal(untrusted.headers.get('access-control-allow-origin'), null);
+  } finally {
+    env.NODE_ENV = originalNodeEnv;
+    env.CLIENT_URL = originalClientUrl;
+  }
+});
+
+test('development CORS allows local Vite and preview origins', async () => {
+  const originalNodeEnv = env.NODE_ENV;
+  const originalClientUrl = env.CLIENT_URL;
+  env.NODE_ENV = 'development';
+  env.CLIENT_URL = 'http://localhost:5173';
+
+  try {
+    for (const origin of ['http://localhost:5173', 'http://localhost:5174']) {
+      const response = await fetch(`${baseUrl}/api/health`, {
+        headers: { Origin: origin },
+      });
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get('access-control-allow-origin'), origin);
+    }
+  } finally {
+    env.NODE_ENV = originalNodeEnv;
+    env.CLIENT_URL = originalClientUrl;
+  }
 });
 
 test('today includes actual activities, session-only time, and removes overlapping session time', async () => {

@@ -30,12 +30,40 @@ Optional settings (defaults shown):
 |---|---|---|
 | `PORT` | `5000` | Backend listen port; if busy, the server retries on the next port. |
 | `JWT_EXPIRES_IN` | `1h` | `jsonwebtoken` expiration duration for access tokens. |
-| `CLIENT_URL` | `http://localhost:5173` | Allowed frontend CORS origin. |
+| `CLIENT_URL` | `http://localhost:5173` in development; `https://restify-6no6.vercel.app` in production | Additional allowed frontend CORS origin. The deployed Vercel origin is also explicitly allowed; localhost origins are development-only. |
 | `NODE_ENV` | `development` | Enables development-only localhost:5174 CORS origin when set to `development`. |
 | `VITE_API_URL` | `http://localhost:5000/api` | Frontend build/dev API base URL. Set in the frontend environment when needed. |
 
 `VITE_API_URL` is read by Vite in the frontend process/build; it is not a backend `.env` setting
 unless explicitly exported to that process.
+
+## Deploy the configured Vercel frontend and Render API
+
+The checked-in Vite mode files set local development to `http://localhost:5000/api` and
+production to `https://restify-p6wb.onrender.com/api`. In the Vercel project settings, set the
+build environment variable `VITE_API_URL` to exactly:
+
+```text
+https://restify-p6wb.onrender.com/api
+```
+
+Vercel environment variables take precedence over `.env.production`; remove any old
+`VITE_API_URL` value pointing at localhost, then trigger a new deployment so the URL is baked
+into the static bundle. The API client appends endpoint paths (for example `/auth/login`), so the
+base must end in `/api` exactly once.
+
+In Render's backend service environment, set:
+
+```text
+NODE_ENV=production
+CLIENT_URL=https://restify-6no6.vercel.app
+```
+
+Keep the existing `MONGODB_URI` and `JWT_SECRET` values configured privately in Render; this
+guide intentionally does not include or inspect them. Render supplies `PORT`; the server uses
+that value and falls back to `5000` for local runs. Save changes and redeploy/restart the Render
+service. The production Vercel origin is explicitly allowlisted by the backend; local Vite
+origins are only allowed when `NODE_ENV=development`.
 
 ## Install and run
 

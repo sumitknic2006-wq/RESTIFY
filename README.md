@@ -41,8 +41,9 @@ and tracking aids; they are not tamper-proof site or device blocking.
    `http://localhost:5000/api/health`.
 
 The backend requires a reachable MongoDB URI and a random `JWT_SECRET` of at least 32 bytes.
-The frontend defaults to `http://localhost:5000/api`; set `VITE_API_URL` at frontend build/dev
-time to use a different API base.
+Local development uses `http://localhost:5000/api`; production builds use the configured
+`VITE_API_URL` in `frontend/.env.production` unless the deployment environment overrides it.
+The deployed Vercel and Render settings are listed in [setup](docs/SETUP.md).
 
 ## Implemented product areas
 
