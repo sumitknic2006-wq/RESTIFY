@@ -1,7 +1,7 @@
 import { getToken } from './tokenStorage';
 
 export const API_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
 ).replace(/\/+$/, '');
 
 async function request(path, options = {}) {

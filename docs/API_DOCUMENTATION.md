@@ -1,6 +1,6 @@
 # RESTIFY HTTP API
 
-The API is mounted at `/api`. Local default base URL: `http://localhost:5000/api`.
+The API is mounted at `/api`. Local default base URL: `http://localhost:5001/api`.
 All request and response bodies use JSON unless otherwise noted.
 
 ## Authentication and response format

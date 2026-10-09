@@ -38,10 +38,10 @@ and tracking aids; they are not tamper-proof site or device blocking.
    ```
 
 4. Open `http://localhost:5173`. The API health endpoint is
-   `http://localhost:5000/api/health`.
+   `http://localhost:5001/api/health`.
 
 The backend requires a reachable MongoDB URI and a random `JWT_SECRET` of at least 32 bytes.
-Local development uses `http://localhost:5000/api`; production builds use the configured
+Local development uses `http://localhost:5001/api`; production builds use the configured
 `VITE_API_URL` in `frontend/.env.production` unless the deployment environment overrides it.
 The deployed Vercel and Render settings are listed in [setup](docs/SETUP.md).
 

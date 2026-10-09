@@ -28,18 +28,18 @@ Optional settings (defaults shown):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `PORT` | `5000` | Backend listen port; if busy, the server retries on the next port. |
+| `PORT` | `5001` in development; `5000` otherwise | Backend listen port; if busy, the development server retries on the next port. |
 | `JWT_EXPIRES_IN` | `1h` | `jsonwebtoken` expiration duration for access tokens. |
 | `CLIENT_URL` | `http://localhost:5173` in development; `https://restify-6no6.vercel.app` in production | Additional allowed frontend CORS origin. The deployed Vercel origin is also explicitly allowed; localhost origins are development-only. |
 | `NODE_ENV` | `development` | Enables development-only localhost:5174 CORS origin when set to `development`. |
-| `VITE_API_URL` | `http://localhost:5000/api` | Frontend build/dev API base URL. Set in the frontend environment when needed. |
+| `VITE_API_URL` | `http://localhost:5001/api` | Frontend build/dev API base URL. Set in the frontend environment when needed. |
 
 `VITE_API_URL` is read by Vite in the frontend process/build; it is not a backend `.env` setting
 unless explicitly exported to that process.
 
 ## Deploy the configured Vercel frontend and Render API
 
-The checked-in Vite mode files set local development to `http://localhost:5000/api` and
+The checked-in Vite mode files set local development to `http://localhost:5001/api` and
 production to `https://restify-p6wb.onrender.com/api`. In the Vercel project settings, set the
 build environment variable `VITE_API_URL` to exactly:
 
@@ -51,6 +51,10 @@ Vercel environment variables take precedence over `.env.production`; remove any 
 `VITE_API_URL` value pointing at localhost, then trigger a new deployment so the URL is baked
 into the static bundle. The API client appends endpoint paths (for example `/auth/login`), so the
 base must end in `/api` exactly once.
+When the Vercel project's Root Directory is `frontend/`, its `vercel.json` rewrites SPA paths
+such as `/login` and `/dashboard` to the app shell while Vercel serves generated static assets
+normally. If the project uses a different Root Directory, put the same config at that directory's
+root. The Vercel dashboard's Root Directory setting is not available in this checkout.
 
 In Render's backend service environment, set:
 
@@ -83,7 +87,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173`; verify API reachability at `http://localhost:5000/api/health`.
+Open `http://localhost:5173`; verify API reachability at `http://localhost:5001/api/health`.
 Backend startup validates JWT configuration and waits for MongoDB. A connection failure prevents
 the API from starting.
 
