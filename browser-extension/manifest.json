@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "RESTIFY",
+  "version": "1.0.0",
+  "minimum_chrome_version": "102",
+  "description": "Track supported browser website sessions against your RESTIFY rules.",
+  "permissions": [
+    "alarms",
+    "idle",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "http://127.0.0.1:5000/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "RESTIFY",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

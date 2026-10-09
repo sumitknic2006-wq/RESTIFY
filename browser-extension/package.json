@@ -1,0 +1,9 @@
+{
+  "name": "restify-browser-extension",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check background.js && node --check content.js && node --check popup.js && node --check rules.js && npm test"
+  }
+}
